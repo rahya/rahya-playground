@@ -9,22 +9,22 @@ func debug(str string) {
 }
 
 type WorkerHandler struct {
-	step   uint32
-	signal chan uint32
+	step   int
+	signal chan int
 	quit   chan bool
 }
 
 func (ossd *WorkerHandler) Init() {
-	ossd.signal = make(chan uint32)
+	ossd.signal = make(chan int)
 	ossd.quit = make(chan bool)
 	ossd.step = 0
 }
 
-func (ossd *WorkerHandler) StepSet(s uint32) {
+func (ossd *WorkerHandler) StepSet(s int) {
 	ossd.step = s
 }
 
-func (ossd *WorkerHandler) Step() uint32 {
+func (ossd *WorkerHandler) Step() int {
 	return ossd.step
 }
 
@@ -33,7 +33,7 @@ func (ossd *WorkerHandler) Close() {
 	close(ossd.quit)
 }
 
-func (ossd *WorkerHandler) Signal() chan uint32 {
+func (ossd *WorkerHandler) Signal() chan int {
 	return ossd.signal
 }
 
@@ -50,10 +50,10 @@ func (ossd *WorkerHandler) Action(h WorkerHandlerInterface, bi WorkerInterface) 
 type WorkerHandlerInterface interface {
 	Action(h WorkerHandlerInterface, bi WorkerInterface)
 	Init()
-	StepSet(s uint32)
-	Step() uint32
+	StepSet(s int)
+	Step() int
 	Close()
-	Signal() chan uint32
+	Signal() chan int
 	Quit() chan bool
 }
 

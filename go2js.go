@@ -5,10 +5,10 @@ import (
 )
 
 const (
-	JS_START             = iota
-	JS_CONSOLE_LOG       = iota
-	JS_TEST              = iota
-	CALL_NUM       uint8 = iota
+	JS_START           = iota
+	JS_CONSOLE_LOG     = iota
+	JS_TEST            = iota
+	CALL_NUM       int = iota
 )
 
 type go2js struct {
@@ -28,7 +28,7 @@ func (ji *go2js) registerCalls() {
 	//fmt.Printf("Function %+T\n", pp)
 }
 
-func (ji *go2js) call(pos uint8, args ...interface{}) {
+func (ji *go2js) call(pos int, args ...interface{}) {
 	ji.calls[pos].Invoke(args...)
 }
 

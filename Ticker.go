@@ -2,15 +2,15 @@ package main
 
 import "time"
 
-import "fmt"
+//import "fmt"
 
 type TickerInterface interface {
-	Signal() chan uint32
+	Signal() chan int
 	Quit() chan bool
 }
 
 type TickerHandler struct {
-	step     uint32
+	step     int
 	refTime  time.Time
 	TimeLaps time.Duration
 	pauseAt  time.Time
@@ -38,24 +38,15 @@ func (c *TickerHandler) Init() {
 }
 
 func (c *TickerHandler) timeToNext() time.Duration {
-	if c.StepNumber() > c.step {
-		fmt.Printf("timeToNext : %+v\n", c.TimeLaps/2)
-		return c.TimeLaps / 2
-	}
 	tmp := c.refTime.Add(time.Duration(c.step+1) * c.TimeLaps).Sub(time.Now())
-	if tmp > 0 {
-		fmt.Printf("timeToNext : %+v\n", tmp)
-		return tmp
-	}
-	fmt.Printf("timeToNext : %+v\n", time.Millisecond)
-	return time.Duration(1 * time.Millisecond)
+	return tmp
 }
 
-func (c *TickerHandler) StepNumber() uint32 {
-	return uint32(time.Now().Sub(c.refTime) / c.TimeLaps)
+func (c *TickerHandler) StepNumber() int {
+	return int(time.Now().Sub(c.refTime) / c.TimeLaps)
 }
 
-func (c *TickerHandler) Step() uint32 {
+func (c *TickerHandler) Step() int {
 	return c.step
 }
 
@@ -72,7 +63,7 @@ func stateWait(c *TickerHandler, i TickerInterface) {
 			// Ignore and should never be call
 		case <-c.start:
 			c.refTime = c.refTime.Add(time.Now().Sub(c.pauseAt))
-			stateRunning(c, i)
+			//stateRunning(c, i)
 		case <-c.quit:
 			return
 		}
@@ -80,34 +71,32 @@ func stateWait(c *TickerHandler, i TickerInterface) {
 	close(c.start)
 	close(c.pause)
 	close(c.quit)
-	i.Quit() <- true
+	//i.Quit() <- true
 }
 
-func stateRunning(c *TickerHandler, i TickerInterface) {
+/*
+func stateRunning(c *TickerHandler) {
+	var td time.Duration
 	for {
-		fmt.Println(" Loop Running State.")
-		select {
-		case <-c.pause:
-			fmt.Println(" Pause while running")
-			c.pauseAt = time.Now()
-			return
-		case <-time.After(c.timeToNext()):
-			fmt.Println(" commit Signal.")
-			commitSignal(c, i)
-		case <-c.quit:
-			fmt.Println(" Quit while running")
-			return
+		td = c.timeToNext()
+		fmt.Printf("td: %+v\n", td)
+		time.Sleep(td)
+		{
+			//i.Signal() <- c.step
+			JS.call(JS_TEST, c.Step(), 0)
+			c.step += 1
 		}
-		fmt.Println("end loop Running State.")
 	}
-	fmt.Println("quit Running State.")
 }
+*/
 
 func commitSignal(c *TickerHandler, i TickerInterface) {
-	select {
-	case i.Signal() <- c.step:
-		c.step += 1
-	default:
-		// no commitment
-	}
+	/*
+		select {
+		case i.Signal() <- c.step:
+			c.step += 1
+		default:
+			// no commitment
+		}
+	*/
 }
