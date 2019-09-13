@@ -8,6 +8,10 @@ public class pilot : MonoBehaviour
     public float inertia;
     public float current_inertia;
 
+    public GameObject _mainCamera;
+    public GameObject _explosion;
+
+
     public float h_inertia;
     public float h_current_inertia;
     public Rigidbody2D rb;
@@ -28,8 +32,16 @@ public class pilot : MonoBehaviour
             h_current_inertia = Mathf.Min(h_inertia, h_current_inertia + translation);
             h_current_inertia = Mathf.Max(-h_inertia, h_current_inertia + translation);
             //transform.Translate(new Vector3(0, thrust * current_inertia / inertia, 0)) ;
-            if(translation > 0) lt.SetActive(true);
-            else rt.SetActive(true);
+            if (translation > 0)
+            {
+                lt.SetActive(true);
+                transform.Rotate(0, 0, -20f* Time.deltaTime, Space.Self);
+            }
+            else
+            {
+                rt.SetActive(true);
+                transform.Rotate(0, 0, 20f* Time.deltaTime, Space.Self);
+            }
         }
         else
         {
@@ -37,7 +49,7 @@ public class pilot : MonoBehaviour
             lt.SetActive(false);
             rt.SetActive(false);
         }
-        rb.AddForce(new Vector3((thrust/2) * h_current_inertia / h_inertia, 0, 0));
+        //rb.AddForce(new Vector3((thrust/2) * h_current_inertia / h_inertia, 0, 0));
     }
 
     // Update is called once per frame <>
@@ -61,16 +73,23 @@ public class pilot : MonoBehaviour
             mt.SetActive(false);
             translation = 1f;
         }
-        rb.AddForce(new Vector3(0, translation * current_inertia / inertia, 0));
+        rb.AddForce(this.transform.up * translation * current_inertia / inertia);
 
         HorizontalMove();
+
+        _mainCamera.transform.position = new Vector3(this.transform.position.x, this.transform.position.y, _mainCamera.transform.position.z); 
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.Log("Booom 2");
-        transform.SetPositionAndRotation(new Vector3(-4, 0, 0), new Quaternion());
-        h_current_inertia = 0;
-        current_inertia = 0;
+        Debug.Log(collision.transform.parent.tag);
+        if (collision.transform.parent.tag == "Respawn") {
+            _explosion.SetActive(true);
+            _explosion.GetComponent<Animator>().Play();
+            //GameObject explosion = Instantiate(_explosion, transform.position, new Quaternion());
+            transform.SetPositionAndRotation(new Vector3(-4, 0, 0), new Quaternion());
+            h_current_inertia = 0;
+            current_inertia = 0;
+        }
     }
 }
